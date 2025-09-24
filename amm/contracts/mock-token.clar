@@ -41,5 +41,8 @@
 )
 
 (define-public (mint (amount uint) (recipient principal))
-    (ft-mint? mock-token amount recipient)
+    (begin
+        (asserts! (is-eq tx-sender contract-owner) err-owner-only)
+        (ft-mint? mock-token amount recipient)
+    )
 )
