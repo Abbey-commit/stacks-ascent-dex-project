@@ -12,7 +12,7 @@ path = 'contracts/mock-token.clar'
 clarity_version = 3
 epoch = 'latest'
 
-[contracts.mock-token 2]
+[contracts.mock-token-2]
 path = 'contracts/mock-token.clar'
 clarity_version = 3
 epoch = 'latest'
