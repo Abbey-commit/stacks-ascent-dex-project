@@ -71,6 +71,11 @@ plan:
     - id: 1
       transactions:
         - emulated-contract-publish:
+            contract-name: amm
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/amm.clar
+            clarity-version: 3
+        - emulated-contract-publish:
             contract-name: mock-token
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: contracts/mock-token.clar
@@ -78,6 +83,6 @@ plan:
         - emulated-contract-publish:
             contract-name: mock-token-2
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/mock-token.clar
+            path: contracts/mock-token-2.clar
             clarity-version: 3
       epoch: "3.2"
