@@ -41,5 +41,13 @@
 )
 
 (define-public (mint (amount uint) (recipient principal))
-	(ft-mint? mock-token amount recipient)
+    (begin
+        ;; This security check ensures only the contract-owner (the deployer) can call this function.
+        (asserts! (is-eq tx-sender contract-owner) err-owner-only) 
+        
+        ;; Use as-contract to call the ft-mint? function.
+        ;; The ft-mint? function must be called by the token owner, which is the contract itself.
+        (as-contract (try! (ft-mint? mock-token amount recipient)))
+        (ok true)
+    )
 )

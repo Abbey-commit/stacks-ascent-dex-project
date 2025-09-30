@@ -4,24 +4,24 @@
 (define-constant err-owner-only (err u100))
 (define-constant err-not-token-owner (err u101))
 
-;; Second fungible token
-(define-fungible-token mock-token-2)
+;; No maximum supply!
+(define-fungible-token mock-token)
 
 (define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
 	(begin
 		(asserts! (is-eq tx-sender sender) err-not-token-owner)
-		(try! (ft-transfer? mock-token-2 amount sender recipient))
+		(try! (ft-transfer? mock-token amount sender recipient))
 		(match memo to-print (print to-print) 0x)
 		(ok true)
 	)
 )
 
 (define-read-only (get-name)
-	(ok "Mock Token 2")
+	(ok "Mock Token")
 )
 
 (define-read-only (get-symbol)
-	(ok "MT2")
+	(ok "MT")
 )
 
 (define-read-only (get-decimals)
@@ -29,11 +29,11 @@
 )
 
 (define-read-only (get-balance (who principal))
-	(ok (ft-get-balance mock-token-2 who))
+	(ok (ft-get-balance mock-token who))
 )
 
 (define-read-only (get-total-supply)
-	(ok (ft-get-supply mock-token-2))
+	(ok (ft-get-supply mock-token))
 )
 
 (define-read-only (get-token-uri)
@@ -41,5 +41,13 @@
 )
 
 (define-public (mint (amount uint) (recipient principal))
-	(ft-mint? mock-token-2 amount recipient)
+    (begin
+        ;; This security check ensures only the contract-owner (the deployer) can call this function.
+        (asserts! (is-eq tx-sender contract-owner) err-owner-only) 
+        
+        ;; Use as-contract to call the ft-mint? function.
+        ;; The ft-mint? function must be called by the token owner, which is the contract itself.
+        (as-contract (try! (ft-mint? mock-token amount recipient)))
+        (ok true)
+    )
 )
