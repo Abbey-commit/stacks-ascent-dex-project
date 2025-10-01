@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "frontend2",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,12 +9,10 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@mantine/core": "^8.3.2",
-    "@mantine/hooks": "^8.3.2",
-    "@mantine/modals": "^8.3.2",
-    "@micro-stacks/react": "^1.0.9",
-    "@tabler/icons-react": "^3.35.0",
-    "micro-stacks": "^1.2.1",
+    "@stacks/auth": "^7.2.0",
+    "@stacks/connect": "^7.7.0",
+    "@stacks/network": "^7.2.0",
+    "@stacks/transactions": "^7.2.0",
     "next": "15.5.4",
     "react": "19.1.0",
     "react-dom": "19.1.0"

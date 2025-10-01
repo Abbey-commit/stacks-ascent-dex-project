@@ -1,38 +1,32 @@
-import { Title, Group, Button, Text } from '@mantine/core';
-import { useAuth } from '@micro-stacks/react';
-// import { StacksTestnet } from 'micro-stacks/network'; // Removed as it's not needed here
+'use client';
 
-// Function to truncate the STX address for display
-const truncateAddress = (address: string) => {
-  if (address.length < 10) return address;
-  return `${address.substring(0, 4)}...${address.substring(address.length - 4)}`;
-};
+// Removed Header from this import as it's deprecated in Mantine v7
+import { Group, Title, Button, Container } from '@mantine/core'; 
+import { useAuth } from '@micro-stacks/react';
 
 export default function NavBar() {
+  // CRITICAL: Must be destructured from the useAuth hook inside a Client Component
   const { isSignedIn, handleSignIn, handleSignOut, userData } = useAuth();
 
-  // Safely access the user's Testnet address
-  const userAddress = isSignedIn
-    ? userData?.profile?.stxAddress?.testnet
-    : '';
+  // Safely extract the user address for display
+  const userAddress = userData?.profile?.stxAddress?.testnet;
 
   return (
-    <header className="bg-gray-900 border-b border-gray-700 h-16 p-4">
-      <div className="flex justify-between items-center h-full max-w-7xl mx-auto">
-        <Title order={3} className="text-indigo-400 font-extrabold text-xl">
+    // Changed Mantine <Header> to a standard HTML <header> tag, preserving styling via Tailwind.
+    // h-16 (64px) approximates the old height.
+    <header className="bg-gray-900 border-b border-indigo-700 shadow-xl h-16 p-4"> 
+      <Container size="lg" className="h-full flex justify-between items-center">
+        <Title order={3} className="text-white font-extrabold text-xl sm:text-2xl">
           Stacks AMM
         </Title>
         <Group>
-          {isSignedIn && userAddress ? (
+          {isSignedIn ? (
             <div className="flex items-center space-x-3">
-              <Text
-                size="sm"
-                className="text-gray-300 bg-gray-700 p-2 rounded-lg font-mono border border-indigo-500"
-              >
-                {truncateAddress(userAddress)}
-              </Text>
+              {/* Display a truncated address */}
+              <span className="text-sm text-indigo-300 hidden sm:inline">
+                {userAddress?.substring(0, 4)}...{userAddress?.substring(userAddress.length - 4)}
+              </span>
               <Button
-                variant="filled"
                 color="red"
                 size="sm"
                 onClick={() => handleSignOut()}
@@ -43,17 +37,16 @@ export default function NavBar() {
             </div>
           ) : (
             <Button
-              variant="filled"
               color="indigo"
               size="sm"
-              onClick={() => handleSignIn()}
+              onClick={() => handleSignIn()} 
               className="hover:bg-indigo-700 transition duration-150 shadow-lg"
             >
               Connect Wallet
             </Button>
           )}
         </Group>
-      </div>
+      </Container>
     </header>
   );
 }

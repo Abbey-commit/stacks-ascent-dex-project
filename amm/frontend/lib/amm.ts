@@ -9,67 +9,57 @@ export const AMM_CONTRACT_NAME = "amm";
 export const MOCK_TOKEN_CONTRACT_NAME = "mock-token";
 export const MOCK_TOKEN_2_CONTRACT_NAME = "mock-token-2";
 
-// The address of the standard trait for SIP-010 (FUNGIBLE TOKENs)
-export const FT_TRAIT_CONTRACT = "sip-010-trait-ft-standard";
-export const FEE_BPS = 500; // 0.50% fee
+// NEW: This is the contract name for the token created by the AMM for liquidity providers (LP tokens).
+// Based on the contract logic, the LP token contract name will be generated using this pattern:
+// 'amm-lp-MOCK-TOKEN-MOCK-TOKEN-2-500' (token-0-token-1-fee-bps)
+export const LIQUIDITY_TOKEN_CONTRACT_NAME = `amm-lp-${MOCK_TOKEN_CONTRACT_NAME}-${MOCK_TOKEN_2_CONTRACT_NAME}-500`;
+
+// Pool Fee (500 bps = 5%)
+export const FEE_BPS = 500;
+
+
+// --- Data Structures ---
+
+export interface PoolData {
+    token0: string; // Contract name of token 0
+    token1: string; // Contract name of token 1
+    lpToken: string; // Contract name of LP token
+    balance0: number; // Token 0 reserve (u6)
+    balance1: number; // Token 1 reserve (u6)
+    reserve0: number; // Token 0 reserve (u6)
+    reserve1: number; // Token 1 reserve (u6)
+    fee: number; // Fee basis points (u10000)
+    totalLPSupply: number; // Total supply of LP tokens (u6)
+}
+
 
 // --- Helper Functions ---
 
-// Function to get the current netword instance
+// Helper to get the network instance (Testnet for this project)
 export const getNetwork = (): StacksNetwork => {
-    if (process.env.NEXT_PUBLIC_NETWORK == 'mainnet') {
-        return new StacksMainnet();
-    }
-    return new StacksTestnet(); // Default to testnet
+  // Always use StacksTestnet for this project setup
+  return new StacksTestnet();
 };
 
-/**
- * Creates the clarity value for the contract trait (like the FT standard).
- * @param contractName The name of the contract implementing the trait (e.g., "mock-token")
- * @returns a ContractPrincipalCV pointing to the trait definition.
- */
-export const getTraitPrincipal = (contractName: string) => {
-    // The trait principal references the contract that *implements* the TransitionEvent,
-    // using the hardcoded trait name defines in the AMM contract's requirements.
-    return contractPrincipalCV(CONTRACT_ADDRESS, contractName);
-}
+// Helper to wrap a token name as a contract principal trait reference (::ft-trait)
+export const getTraitPrincipal = (contractName: string): ClarityValue => {
+  return contractPrincipalCV(CONTRACT_ADDRESS, contractName);
+};
 
-// These are the tokens used in our AMM pool
-export const mockTokenOnePrincipal = getTraitPrincipal(MOCK_TOKEN_CONTRACT_NAME);
-export const mockTokenTwoPrincipal = getTraitPrincipal(MOCK_TOKEN_2_CONTRACT_NAME)
+// Returns the arguments required to generate the unique pool ID (AMM contract's get-pool-data)
+export const getPoolIdArgs = (): ClarityValue[] => {
+    return [
+        getTraitPrincipal(MOCK_TOKEN_CONTRACT_NAME),
+        getTraitPrincipal(MOCK_TOKEN_2_CONTRACT_NAME),
+        uintCV(FEE_BPS),
+    ];
+};
 
-// --- Type Definitions (for future  components) ---
-
-export type PoolData = {
-    balance0: number;
-    balance1: number;
-    fee: number;
-    token0: string;
-    token1: string;
-    lpToken: string;
-    totalLPSupply: number;
-    reserve0: number; // Placeholder for display
-    reserve1: number; // Placeholder for display
-}
-
-// --- Call Structures (examples for references) ---
-
-/**
- * Gets the arguements needed for the AMM create-pool function.
- */
-export const getCreatePoolArgs = () => [
-    mockTokenOnePrincipal, // token-0
-    mockTokenTwoPrincipal, // token-1
-    uintCV(FEE_BPS), // fee-bps
-]
-
-/*
-    Helper to  construct the pool identofier structure used in many AMM functions.
-*/
-export const getPoolIdArgs = () => [
-    {
-        'token-0': mockTokenOnePrincipal,
-        'token-1': mockTokenTwoPrincipal,
-        'fee-bps': uintCV(FEE_BPS)
-    }
-]
+// Returns the arguments required for the create-pool public function
+export const getCreatePoolArgs = (): ClarityValue[] => {
+    return [
+        getTraitPrincipal(MOCK_TOKEN_CONTRACT_NAME),
+        getTraitPrincipal(MOCK_TOKEN_2_CONTRACT_NAME),
+        uintCV(FEE_BPS),
+    ];
+};

@@ -1,57 +1,56 @@
 'use client';
 
-import { Container, Title } from '@mantine/core';
-import { useAuth } from '@micro-stacks/react'; // Only need useAuth for sign-in state
+import { Container, Title, Grid } from '@mantine/core';
+import { useAuth } from '@micro-stacks/react';
+import { useState, useCallback } from 'react';
 
-// We will import constants and functions from '../lib/amm' as needed
-// For now, we only need useAuth to check connection status.
+// Import the components
+import PoolsList from '@/components/PoolsList';
+import SwapCard from '@/components/SwapCard';
+import AddLiquidityCard from '@/components/AddLiquidityCard';
+
+import RemoveLiquidityCard from '@/components/RemoveLiquidityCard';
 
 export default function AMMApp() {
-  // We no longer need useOpenContractCall or local network state here.
   const { isSignedIn, userData } = useAuth();
   
-  // Note: handleSignIn/handleSignOut logic is now only in NavBar.tsx
+  // State used to force components to refetch data after a successful transaction
+  const [dataVersion, setDataVersion] = useState(0);
+
+  // Callback function passed to transaction components to trigger a global data refresh
+  const handlePoolDataChange = useCallback(() => {
+    setDataVersion(prev => prev + 1);
+  }, []);
 
   return (
-    // We are now inside the <AppShell> provided by the <Layout> wrapper
-    <Container size="lg" className="min-h-screen pt-10 pb-20">
-      <div className="text-center">
-        <Title order={1} className="text-4xl font-extrabold text-indigo-400 mb-6">
+    <Container size="xl" className="min-h-screen pt-10 pb-20">
+      <div className="text-center mb-10">
+        <Title order={1} className="text-5xl font-extrabold text-indigo-400">
           Stacks AMM DEX
         </Title>
-        <p className="text-gray-300 mb-8 max-w-xl mx-auto">
-          Welcome! Your contract is deployed to Testnet. Use the **Connect Wallet** button above to get started.
-        </p>
-
-        {isSignedIn ? (
-          <div className="mt-8 p-4 bg-gray-800 rounded-xl shadow-lg border border-green-500/50">
-            <p className="text-green-400 font-semibold">
-              Wallet Connected! Ready for the next step.
-            </p>
-            <p className="text-sm text-gray-400 mt-2">
-              Address: {userData?.profile.stxAddress.testnet}
-            </p>
-          </div>
-        ) : (
-          <div className="mt-8 p-4 bg-gray-800 rounded-xl shadow-lg border border-yellow-500/50">
-             <p className="text-yellow-400 font-semibold">
-               Please connect your wallet using the button in the top right to access the AMM features.
-            </p>
-          </div>
-        )}
-      </div>
-
-      <div className="mt-16 p-6 bg-gray-800 rounded-xl shadow-2xl border border-gray-700">
-        <Title order={3} className="text-white mb-4 border-b border-gray-600 pb-2">
-          Project Next Step
-        </Title>
-        <p className="text-gray-300">
-          We have the core layout and wallet connection ready. The next logical step, following the tutorial, is to create the **Pools listing component** to fetch and display data from your deployed `amm` contract.
+        <p className="text-gray-400 mt-2 max-w-xl mx-auto">
+          Decentralized exchange powered by Clarity smart contracts on the Stacks Testnet.
         </p>
       </div>
 
-      {/* Placeholder for future components like PoolList */}
+      <Grid className="mb-16">
+        {/* Column 1: Swap Card (Transaction Interface) */}
+        <Grid.Col span={{ base: 12, md: 4 }}>
+          <SwapCard onSwapSuccess={handlePoolDataChange} />
+        </Grid.Col>
 
+        {/* Column 2: Pools List (Data Display/Initialization) */}
+        <Grid.Col span={{ base: 12, md: 4 }}>
+          {/* PoolsList uses dataVersion as a key to force a refresh when it changes */}
+          <PoolsList key={dataVersion} onPoolChange={handlePoolDataChange} />
+        </Grid.Col>
+
+        {/* Column 3: Remove Liquidity Card (Liquidity Management) - Temporary Swap for testing */}
+        <Grid.Col span={{ base: 12, md: 4 }}>
+          {/* We are using RemoveLiquidityCard here for testing. You can swap this back to AddLiquidityCard later. */}
+          <RemoveLiquidityCard onLiquidityChange={handlePoolDataChange} />
+        </Grid.Col>
+      </Grid>
     </Container>
   );
 }
