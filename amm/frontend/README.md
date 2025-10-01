@@ -1,36 +1,24 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+The Struggle: AMM Frontend Instability
+The Backend Logic that Worked
+The foundation of the entire project—the Clarity smart contract logic—worked robustly from the start.
 
-## Getting Started
+Contracts: We defined the amm.clar contract along with two fungible tokens, mock-token.clar and mock-token-2.clar.
 
-First, run the development server:
+Core Functions: The functions for create-pool, add-liquidity, remove-liquidity, and swap were written correctly and followed the necessary SIP-010 trait standards.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Testing: We confirmed that the core logic passed the included unit tests (amm.test.ts), validating the AMM's mathematical principles (like the constant product formula and slippage protection).
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The Frontend Start and Initial Success
+Initially, the frontend was set up with a Next.js App Router structure, using Mantine for UI components and @micro-stacks/react for blockchain integration.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Initial Success: We successfully implemented the ClientProvider wrapper, configured the Stacks Testnet, and confirmed that the useAuth hook worked for wallet connection and sign-in/sign-out.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+What Later Failed (The Instability)
+The persistent issue was a continuous stream of Build Errors stemming from the @micro-stacks/react library, specifically related to named exports.
 
-## Learn More
+Dependency Volatility: The library kept renaming its read-only function hook. We initially started with useClarityFn.
 
-To learn more about Next.js, take a look at the following resources:
+The Loop of Errors: When useClarityFn failed, we updated the files (like AddLiquidityCard.tsx) to use useReadOnlyFunction. This fix worked briefly, but the error quickly resurfaced, claiming useReadOnlyFunction did not exist.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The Culprit: The dependency was causing static analysis failures, preventing the build from completing, even after verifying the hook names in the project's source. This led to a cycle where the build repeatedly failed, forcing us to revert or try new names (useClarityFn again in the last attempt).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
